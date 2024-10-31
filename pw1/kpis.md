@@ -35,7 +35,7 @@ RRh = 1000 x (logbook count)/FH (que forma part de la qury a...)
  - logbookCount = SELECT count(*) FROM **TechnicalLogBookOrders** GROUP BY aircraftRegistration
 12. Report Rate per cyple (RRc):
 RRc = 100 x (logbook count)/(TO)
-
+p
 13. PIREP Rate (PRR)
  - pilot_logbook_count = SELECT count(*) FROM **TechnicalLogBookOrders** WHERE  ReportKind = 'PIREP' GROUP BY aircraftRegistration
  - PRRh =1000 x pilot_logbook_count/FH
