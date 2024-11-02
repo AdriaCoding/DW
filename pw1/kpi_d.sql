@@ -8,22 +8,10 @@ SELECT
     DS.aircraftRegistration,
     DS.model,
     L.maintenance_logbook_count,
-    DS.total_FH,
-    DS.total_FO,
-    
+    DS.total_flight_hours,
+    DS.total_departures,
     -- Maintenance Report Rate per Hour (MRRh) = 1000 * Maintenance_Logbook_Count / Total_Flight_Hours
-    CASE 
-        WHEN NVL(DS.total_FH, 0) > 0
-        THEN 1000 * NVL(L.maintenance_logbook_count, 0) / DS.total_FH
-        ELSE 0
-    END AS MRRh,
-
     -- Maintenance Report Rate per Cycle (MRRc) = 100 * Maintenance_Logbook_Count / Total_Departures
-    CASE 
-        WHEN NVL(DS.total_FO, 0) > 0
-        THEN 100 * NVL(L.maintenance_logbook_count, 0) / DS.total_FO
-        ELSE 0
-    END AS MRRc,
 FROM
 (
     SELECT
@@ -36,8 +24,8 @@ FROM
 INNER JOIN 
 (
     SELECT
-        SUM(FH) AS total_FH,
-        SUM(TO) AS total_FO,
+        SUM(FH) AS total_flight_hours,
+        SUM("TO") AS total_departures,
         aircraftRegistration,
         model,
     FROM Daily_Summary

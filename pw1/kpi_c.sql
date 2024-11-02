@@ -8,34 +8,17 @@ SELECT
     DS.model,
 	L.month,
 	L.year,
+
+    DS.total_flight_hours,
+    L.total_logbook_count,
+    DS.total_departures,
+    L.pilot_logbook_count,
+
     -- Report Rate per Hour (RRh) = 1000 * total_logbook_count / total_flight_hours
-    CASE 
-        WHEN NVL(DS.total_flight_hours, 0) > 0 
-        THEN 1000 * NVL(L.total_logbook_count, 0)   / DS.total_flight_hours
-        ELSE 0 
-    END AS RRh,
-    
     -- Report Rate per Cycle (RRc) = 100 * total_logbook_count / total_departures
-    CASE 
-        WHEN NVL(DS.total_departures, 0) > 0 
-        THEN 100 * NVL(L.total_logbook_count, 0)  / DS.total_departures
-        ELSE 0 
-    END AS RRc,
-    
     -- Pilot Report Rate per Hour (PRRh) = 1000 * pilot_logbook_count / total_flight_hours
-    CASE 
-        WHEN NVL(DS.total_flight_hours, 0) > 0 
-        THEN 1000 * NVL(L.pilot_logbook_count, 0) / DS.total_flight_hours
-        ELSE 0 
-    END AS PRRh,
-    
     -- Pilot Report Rate per Cycle (PRRc) = 100 * pilot_logbook_count / total_departures
-    CASE 
-        WHEN NVL(DS.total_departures, 0) > 0 
-        THEN 100 * NVL(L.pilot_logbook_count, 0) / DS.total_departures
-        ELSE 0 
-    END AS PRRc
-	
+  	
 FROM
     (
         SELECT
