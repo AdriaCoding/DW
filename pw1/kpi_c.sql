@@ -25,7 +25,7 @@ FROM
             L.aircraftRegistration,
             TM.month AS month,
             TM.year AS year,
-           	COUNT(reporteur_id) AS total_logbook_count
+           	COUNT(reporteur_id) AS total_logbook_count,
            	COUNT(CASE WHEN reporteur_class = 'PIREP' THEN 1 END) AS pilot_logbook_count,
         FROM
             Logbook L

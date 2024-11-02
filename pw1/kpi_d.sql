@@ -17,7 +17,7 @@ FROM
     SELECT
         Logbook.aircraftRegistration,
         LogBook.airport_id,
-        COUNT(CASE WHEN reporteur_class = 'MAREP' THEN 1 END) AS maintenance_logbook_count,
+        COUNT(CASE WHEN reporteur_class = 'MAREP' THEN 1 END) AS maintenance_logbook_count
     FROM LogBook
     GROUP BY LogBook.airport_id, LogBook.aircraftRegistration
 ) AS L
@@ -27,7 +27,7 @@ INNER JOIN
         SUM(flight_hours) AS total_flight_hours,
         SUM(departures) AS total_departures,
         aircraftRegistration,
-        model,
+        model   
     FROM Daily_Summary
     GROUP BY DS.aircraftRegistration
 ) AS DS 

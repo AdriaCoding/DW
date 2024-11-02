@@ -41,37 +41,3 @@ CREATE TABLE Maintenance (
 );
 
 CREATE INDEX time_id_maintenance_index on Maintenance (time_id);
-
-CREATE MATERIALIZED VIEW Daily_Summary
-BUILD IMMEDIATE
-REFRESH FORCE
-ON DEMAND
-ENABLE QUERY REWRITE
-AS
-	SELECT Flight.aircraftRegistration, Model.model, Time.day, Time.month, Time.year, SUM(Flight.FlightHours) AS FH, COUNT(Flight.time_id) AS "TO"
-	FROM Flight 
-	INNER JOIN Time
-	ON Flight.time_id = Time.time_id
-	INNER JOIN Model
-	ON Flight.aircraftRegistration = Model.aircraftRegistration
-	WHERE Flight.cancelled = 0
-	GROUP BY Flight.aircraftRegistration, Model.model, Time.day, Time.month, Time.year;
-	
-CREATE MATERIALIZED VIEW Monthly_Summary
-BUILD IMMEDIATE
-REFRESH FORCE
-ON DEMAND
-ENABLE QUERY REWRITE
-AS
-	SELECT Maintenance.aircraftRegistration, Model.model, Time.month, Time.YEAR, SUM(Maintenance.DOS)/COUNT(Time.Day) AS ADOS
-	FROM Maintenance 
-	INNER JOIN Time
-	ON Maintenance.time_id = Time.time_id
-	INNER JOIN Model
-	ON Maintenance.aircraftRegistration = Model.aircraftRegistration
-	INNER JOIN Daily_Summary
-	ON Time.month = Daily_Summary.month AND Time.year = Daily_Summary.year
-	GROUP BY Maintenance.aircraftRegistration, Model.model, Time.month, Time.year;
-
-
-
