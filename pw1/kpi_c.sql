@@ -42,8 +42,8 @@ FROM
     		DS.model,
     		DS.month,
     		DS.year,
-    		SUM(DS.FH) AS total_flight_hours,
-    		SUM(DS."TO") AS total_departures
+    		SUM(DS.flight_hours) AS total_flight_hours,
+    		SUM(DS.departures) AS total_departures
     	FROM 
     		DAILY_SUMMARY DS
     	GROUP BY

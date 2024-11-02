@@ -24,8 +24,8 @@ FROM
 INNER JOIN 
 (
     SELECT
-        SUM(FH) AS total_flight_hours,
-        SUM("TO") AS total_departures,
+        SUM(flight_hours) AS total_flight_hours,
+        SUM(departures) AS total_departures,
         aircraftRegistration,
         model,
     FROM Daily_Summary

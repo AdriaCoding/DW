@@ -40,18 +40,18 @@ SELECT
     F.CN AS CancellationCount,
 
     -- Flight Hours and Total Operations
-    F.FH,
-    F.TotalOperations AS "TO",
+    F.flight_hours,
+    F.total_operations,
     
-    -- Daily Utilization (DU) = FH / ADIS
+    -- Daily Utilization (DU) = flight_hours / ADIS
     
-    -- Daily Cycles (DC) = TotalOperations / ADIS
+    -- Daily Cycles (DC) = total_operations / ADIS
     
-    -- Delay Rate (DYR) = (DY / TotalOperations) * 100
+    -- Delay Rate (DYR) = (DY / total_operations) * 100
         
-    -- Cancellation Rate (CNR) = (CN / TotalOperations) * 100
+    -- Cancellation Rate (CNR) = (CN / total_operations) * 100
         
-    -- Technical Dispatch Reliability (TDR) = 100 - ((DY + CN) / TotalOperations ) * 100
+    -- Technical Dispatch Reliability (TDR) = 100 - ((DY + CN) / total_operations ) * 100
         
     -- Average Delay Duration (AD) = (TotalDelayDuration / DY) * 10
 
@@ -63,8 +63,8 @@ FROM
             MD.model,
             TM.month,
             TM.year,
-            SUM(FL.FlightHours) AS FH,
-            COUNT(CASE WHEN FL.cancelled = '0' THEN 1 END) AS TotalOperations,
+            SUM(FL.FlightHours) AS flight_hours,
+            COUNT(CASE WHEN FL.cancelled = '0' THEN 1 END) AS total_operations,
             COUNT(CASE WHEN FL.cancelled = '1' THEN 1 END) AS CN,
             COUNT(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN 1 END) AS DY,
             SUM(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN FL.delay_duration ELSE 0 END) AS TDD
