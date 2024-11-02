@@ -1,4 +1,4 @@
-CREATE MATERIALIZED VIEW Maintenance_summary 
+CREATE MATERIALIZED VIEW Monthly_summary 
 BUILD IMMEDIATE
 REFRESH FORCE
 ON DEMAND
@@ -33,48 +33,28 @@ SELECT
     M.ADOSS,
     M.ADOSU,
     M.ADIS,
+
+    -- Delays and Cancellations
+    F.DY AS DelayCount,
+    F.TDD AS TotalDelayDuration,
+    F.CN AS CancellationCount,
+
+    -- Flight Hours and Total Operations
+    F.FH,
+    F.TotalOperations AS "TO",
     
     -- Daily Utilization (DU) = FH / ADIS
-    CASE
-        WHEN NVL(M.ADIS, 0) > 0
-        THEN F.FH / M.ADIS
-        ELSE 0
-    END AS DU,
     
     -- Daily Cycles (DC) = TotalOperations / ADIS
-    CASE
-        WHEN NVL(M.ADIS, 0) > 0
-        THEN F.TotalOperations / M.ADIS
-        ELSE 0
-    END AS DC,
     
     -- Delay Rate (DYR) = (DY / TotalOperations) * 100
-    CASE 
-        WHEN NVL(F.TotalOperations, 0) > 0 
-        THEN (NVL(F.DY, 0) / NVL(F.TotalOperations, 0)) * 100 
-        ELSE 0 
-    END AS DYR,
         
     -- Cancellation Rate (CNR) = (CN / TotalOperations) * 100
-    CASE 
-        WHEN NVL(F.TotalOperations, 0) > 0 
-        THEN (NVL(F.CN, 0) / NVL(F.TotalOperations, 0)) * 100 
-        ELSE 0 
-    END AS CNR,
         
     -- Technical Dispatch Reliability (TDR) = 100 - ((DY + CN) / TotalOperations ) * 100
-    CASE 
-        WHEN NVL(F.TotalOperations, 0) > 0 
-        THEN 100 - ((NVL(F.DY, 0) + NVL(F.CN, 0)) / NVL(F.TotalOperations, 0)) * 100 
-        ELSE 0 
-    END AS TDR,
         
     -- Average Delay Duration (AD) = (TotalDelayDuration / DY) * 10
-    CASE 
-        WHEN NVL(F.DY, 0) > 0 
-        THEN (NVL(F.TotalDelayDuration, 0) / NVL(F.DY, 0)) * 10 
-        ELSE 0 
-    END AS AD
+
         
 FROM
     (
@@ -87,7 +67,7 @@ FROM
             COUNT(CASE WHEN FL.cancelled = '0' THEN 1 END) AS TotalOperations,
             COUNT(CASE WHEN FL.cancelled = '1' THEN 1 END) AS CN,
             COUNT(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN 1 END) AS DY,
-            SUM(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN FL.delay_duration ELSE 0 END) AS TotalDelayDuration
+            SUM(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN FL.delay_duration ELSE 0 END) AS TDD
         FROM
             Flight FL
             INNER JOIN Time TM ON FL.time_id = TM.time_id
