@@ -58,25 +58,22 @@ SELECT
         
 FROM
     (
-        SELECT
-            FL.aircraftRegistration,
-            MD.model,
-            TM.month,
-            TM.year,
-            SUM(FL.FlightHours) AS flight_hours,
-            COUNT(CASE WHEN FL.cancelled = '0' THEN 1 END) AS total_operations,
-            COUNT(CASE WHEN FL.cancelled = '1' THEN 1 END) AS CN,
-            COUNT(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN 1 END) AS DY,
-            SUM(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN FL.delay_duration ELSE 0 END) AS TDD
-        FROM
-            Flight FL
-            INNER JOIN Time TM ON FL.time_id = TM.time_id
-            INNER JOIN Model MD ON FL.aircraftRegistration = MD.aircraftRegistration
+        SELECT 
+            DS.aircraftRegistration,
+            DS.model,
+            DS.month,
+            DS.year,
+            SUM(DS.flight_hours) AS flight_hours,
+            SUM(DS.total_operations) AS total_operations,
+            SUM(DS.CN) AS CN,
+            SUM(DS.DY) AS DY,
+            SUM(DS.TDD) AS TDD
+        FROM Daily_summary DS
         GROUP BY
-            FL.aircraftRegistration,
-            MD.model,
-            TM.month,
-            TM.year
+            DS.month, 
+            DS.year, 
+            DS.aircraftRegistration,
+            DS.model
     ) F
     FULL OUTER JOIN
     (

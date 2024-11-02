@@ -5,19 +5,21 @@ ON DEMAND
 ENABLE QUERY REWRITE
 AS
     SELECT 
-        Flight.aircraftRegistration,
+        FL.aircraftRegistration,
         Model.model,
         Time.day,
         Time.month,
         Time.year,
-        SUM(Flight.FlightHours) AS flight_hours,
-        COUNT(Flight.time_id) AS departures
-    FROM Flight 
-	    INNER JOIN Time ON Flight.time_id = Time.time_id
-	    INNER JOIN Model ON Flight.aircraftRegistration = Model.aircraftRegistration
-    WHERE Flight.cancelled = 0
+        SUM(FL.FlightHours) AS flight_hours,
+        COUNT(CASE WHEN FL.cancelled = '0' THEN 1 END) AS total_operations,
+        COUNT(CASE WHEN FL.cancelled = '1' THEN 1 END) AS CN,
+        COUNT(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN 1 END) AS DY,
+        SUM(CASE WHEN FL.delay_duration BETWEEN 15 AND 360 THEN FL.delay_duration ELSE 0 END) AS TDD
+    FROM Flight FL
+	    INNER JOIN Time ON FL.time_id = Time.time_id
+	    INNER JOIN Model ON FL.aircraftRegistration = Model.aircraftRegistration
     GROUP BY
-        Flight.aircraftRegistration, 
+        FL.aircraftRegistration, 
         Model.model,
         Time.day,
         Time.month,
