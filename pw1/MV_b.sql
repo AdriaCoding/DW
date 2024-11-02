@@ -1,10 +1,10 @@
-CREATE MATERIALIZED VIEW Monthly_summary 
+CREATE MATERIALIZED VIEW Maintenance_summary 
 BUILD IMMEDIATE
 REFRESH FORCE
 ON DEMAND
 ENABLE QUERY REWRITE
 AS
-WITH MaintenanceSummary AS (
+WITH MS AS (
     SELECT
         MA.aircraftRegistration,
         MD.model,
@@ -90,8 +90,7 @@ FROM
             EXTRACT(
                 DAY FROM LAST_DAY(TO_DATE(LPAD(MS.month, 2, '0') || '-' || MS.year, 'MM-YYYY'))
             ) - NVL(MS.ADOSS + MS.ADOSU, 0) AS ADIS
-        FROM
-            MaintenanceSummary MS
+        FROM MS
     ) M
     ON F.aircraftRegistration = M.aircraftRegistration 
        AND F.month = M.month 
