@@ -21,14 +21,64 @@ WITH MS AS (
         MD.model,
         TM.month,
         TM.year
+),
+L AS (
+    SELECT
+        LB.aircraftRegistration,
+        MD.model,
+        TM.month,
+        TM.year,
+        COUNT(LB.reporteur_id) AS total_logbook_count,
+        COUNT(CASE WHEN rLB.eporteur_class = 'PIREP' THEN 1 END) AS pilot_logbook_count
+    FROM
+        LogBook LB
+        INNER JOIN Time TM ON LB.time_id = TM.time_id
+        INNER JOIN Model MD ON LB.aircraftRegistration = MD.aircraftRegistration
+    GROUP BY
+        LB.aircraftRegistration,
+        MD.model,
+        TM.month,
+        TM.year
+),
+F AS (
+    SELECT 
+        DS.aircraftRegistration,
+        DS.model,
+        DS.month,
+        DS.year,
+        SUM(DS.flight_hours) AS flight_hours,
+        SUM(DS.total_operations) AS total_operations,
+        SUM(DS.CN) AS CN,
+        SUM(DS.DY) AS DY,
+        SUM(DS.TDD) AS TDD
+    FROM Daily_summary DS
+    GROUP BY
+        DS.aircraftRegistration,
+        DS.model,
+        DS.month, 
+        DS.year
+),
+Keys AS (
+    SELECT DISTINCT
+        aircraftRegistration,
+        model,
+        month,
+        year
+    FROM (
+        SELECT aircraftRegistration, model, month, year FROM MS
+        UNION
+        SELECT aircraftRegistration, model, month, year FROM L
+        UNION
+        SELECT aircraftRegistration, model, month, year FROM F
+    )
 )
 SELECT
-    NVL(F.aircraftRegistration, M.aircraftRegistration) AS aircraftRegistration,
-    NVL(F.model, M.model) AS model,
-    NVL(F.month, M.month) AS month,
-    NVL(F.year, M.year) AS year,
-       
-    -- Aircraft Days In/Out of Service (ADOS, ADIS, etc)
+    K.aircraftRegistration,
+    K.model,
+    K.month,
+    K.year,
+
+    -- Maintenance Metrics (ADOS, ADIS, etc)
     M.ADOS,
     M.ADOSS,
     M.ADOSU,
@@ -39,10 +89,14 @@ SELECT
     F.TDD AS TotalDelayDuration,
     F.CN AS CancellationCount,
 
+    -- Logbook Metrics
+    L.total_logbook_count,
+    L.pilot_logbook_count,
+    
     -- Flight Hours and Total Operations
     F.flight_hours,
     F.total_operations,
-    
+
     -- Daily Utilization (DU) = flight_hours / ADIS
     
     -- Daily Cycles (DC) = total_operations / ADIS
@@ -54,28 +108,19 @@ SELECT
     -- Technical Dispatch Reliability (TDR) = 100 - ((DY + CN) / total_operations ) * 100
         
     -- Average Delay Duration (AD) = (TotalDelayDuration / DY) * 10
+    
+    -- Report Rate per Hour (RRh) = 1000 * total_logbook_count / total_flight_hours
+    
+    -- Report Rate per Cycle (RRc) = 100 * total_logbook_count / total_departures
+    
+    -- Pilot Report Rate per Hour (PRRh) = 1000 * pilot_logbook_count / total_flight_hours
+    
+    -- Pilot Report Rate per Cycle (PRRc) = 100 * pilot_logbook_count / total_departures
 
         
 FROM
-    (
-        SELECT 
-            DS.aircraftRegistration,
-            DS.model,
-            DS.month,
-            DS.year,
-            SUM(DS.flight_hours) AS flight_hours,
-            SUM(DS.total_operations) AS total_operations,
-            SUM(DS.CN) AS CN,
-            SUM(DS.DY) AS DY,
-            SUM(DS.TDD) AS TDD
-        FROM Daily_summary DS
-        GROUP BY
-            DS.month, 
-            DS.year, 
-            DS.aircraftRegistration,
-            DS.model
-    ) F
-    FULL OUTER JOIN
+    Keys K
+    LEFT JOIN
     (
         SELECT
             MS.aircraftRegistration,
@@ -92,6 +137,17 @@ FROM
             ) - NVL(MS.ADOSS + MS.ADOSU, 0) AS ADIS
         FROM MS
     ) M
-    ON F.aircraftRegistration = M.aircraftRegistration 
-       AND F.month = M.month 
-       AND F.year = M.year;
+    ON K.aircraftRegistration = M.aircraftRegistration
+       AND K.model = M.model 
+       AND K.month = M.month 
+       AND K.year = M.year
+    LEFT JOIN L
+    ON K.aircraftRegistration = L.aircraftRegistration
+       AND K.model = L.model
+       AND K.month = L.month
+       AND K.year = L.year
+    LEFT JOIN F
+    ON K.aircraftRegistration = F.aircraftRegistration
+       AND K.model = F.model
+       AND K.month = F.month
+       AND K.year = F.year;
