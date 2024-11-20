@@ -34,3 +34,24 @@ contains tuples
 containing those tuples (and maybe others)
 • Query containment (subsumption): A query Q1 is contained in another Q2, if the set of tuples of Q1 is
 always contained in the set of tuples of Q2 in every consistent DB state
+
+
+# Schema and Data integration
+PROBLEM: Make a single query on several, heterogenous, datasets.
+
+SOLUTIONS
+### (a) Manually query the different databases separately
+- Know the available databases
+- Data
+- Data model
+- Query language
+- Decompose the query
+- Integrate the results
+### (b) Create a new database containing all necessary data
+- Design it
+- Move data
+- Modify the applications to use the new repository
+- Test everything
+### (c) Build a software layer on top of the databases that automatically splits the queries and integrates the answers
+- Automate the processing of the queries
+- Add a new software layer that defines two access levels
