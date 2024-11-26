@@ -47,7 +47,7 @@ SOLUTIONS
 - Query language
 - Decompose the query
 - Integrate the results
-### (b) Create a new database containing all necessary data
+### (b) Create  a new database containing all necessary data
 - Design it
 - Move data
 - Modify the applications to use the new repository
